@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendLowStockNotification;
 use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -136,9 +137,20 @@ class CartController extends Controller
                 }
             }
 
+            $lowStockThreshold = SendLowStockNotification::DEFAULT_THRESHOLD;
+
             foreach ($items as $item) {
                 $product = $productMap->get($item->product_id);
+                $previousStock = $product->stock_quantity;
+
                 $product->decrement('stock_quantity', $item->quantity);
+
+                $remaining = $product->stock_quantity;
+
+                if ($previousStock > $lowStockThreshold && $remaining <= $lowStockThreshold) {
+                    SendLowStockNotification::dispatch($product, $remaining, $lowStockThreshold)
+                        ->afterCommit();
+                }
             }
 
             CartItem::query()
