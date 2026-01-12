@@ -1,4 +1,4 @@
-import { InertiaLinkProps } from '@inertiajs/vue3';
+﻿import { InertiaLinkProps } from '@inertiajs/vue3';
 import type { LucideIcon } from 'lucide-vue-next';
 
 export interface Auth {
@@ -14,6 +14,7 @@ export interface NavItem {
     title: string;
     href: NonNullable<InertiaLinkProps['href']>;
     icon?: LucideIcon;
+    badge?: number;
     isActive?: boolean;
 }
 
@@ -22,8 +23,8 @@ export type AppPageProps<
 > = T & {
     name: string;
     auth: Auth;
-    flash?: {
-        success?: string;
+    cart: {
+        count: number;
     };
     sidebarOpen: boolean;
     [key: string]: unknown;

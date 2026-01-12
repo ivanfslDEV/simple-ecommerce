@@ -16,10 +16,12 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('products', [ProductController::class, 'index'])->name('products.index');
+Route::get('cart', [CartController::class, 'index'])->name('cart.index');
+
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('products', [ProductController::class, 'index'])->name('products.index');
-    Route::get('cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('cart', [CartController::class, 'store'])->name('cart.store');
+    Route::post('cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
     Route::put('cart/{cartItem}', [CartController::class, 'update'])->name('cart.update');
     Route::delete('cart/{cartItem}', [CartController::class, 'destroy'])->name('cart.destroy');
 });

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import {
     SidebarGroup,
     SidebarGroupLabel,
@@ -30,6 +30,12 @@ const { urlIsActive } = useActiveUrl();
                     <Link :href="item.href">
                         <component :is="item.icon" />
                         <span>{{ item.title }}</span>
+                        <span
+                            v-if="item.badge && item.badge > 0"
+                            class="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+                        >
+                            {{ item.badge }}
+                        </span>
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>

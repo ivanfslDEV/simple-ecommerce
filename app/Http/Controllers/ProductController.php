@@ -11,7 +11,7 @@ class ProductController extends Controller
     {
         $products = Product::query()
             ->orderBy('name')
-            ->get(['id', 'name', 'price', 'stock_quantity']);
+            ->get(['id', 'name', 'image_url', 'price', 'stock_quantity']);
 
         return Inertia::render('Products/Index', [
             'products' => $products,

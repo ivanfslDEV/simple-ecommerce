@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -13,11 +13,15 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import { BookOpen, Folder, ShoppingCart, Store } from 'lucide-vue-next';
+import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
-const mainNavItems: NavItem[] = [
+const page = usePage();
+const cartCount = computed(() => Number(page.props.cart?.count ?? 0));
+
+const mainNavItems = computed<NavItem[]>(() => [
     {
         title: 'Products',
         href: '/products',
@@ -27,8 +31,9 @@ const mainNavItems: NavItem[] = [
         title: 'Cart',
         href: '/cart',
         icon: ShoppingCart,
+        badge: cartCount.value,
     },
-];
+]);
 
 const footerNavItems: NavItem[] = [
     {

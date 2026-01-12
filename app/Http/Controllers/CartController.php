@@ -5,17 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class CartController extends Controller
 {
     public function index(Request $request)
     {
-        $items = CartItem::query()
-            ->with(['product:id,name,price,stock_quantity'])
-            ->where('user_id', $request->user()->id)
-            ->orderBy('created_at')
-            ->get();
+        $user = $request->user();
+
+        $items = $user
+            ? CartItem::query()
+                ->with(['product:id,name,price,stock_quantity'])
+                ->where('user_id', $user->id)
+                ->orderBy('created_at')
+                ->get()
+            : collect();
 
         return Inertia::render('Cart/Index', [
             'items' => $items,
@@ -92,5 +98,54 @@ class CartController extends Controller
         $cartItem->delete();
 
         return back()->with('success', 'Item removed.');
+    }
+
+    public function checkout(Request $request)
+    {
+        $user = $request->user();
+
+        $items = CartItem::query()
+            ->with(['product:id,name,stock_quantity'])
+            ->where('user_id', $user->id)
+            ->get();
+
+        if ($items->isEmpty()) {
+            return back()->withErrors([
+                'cart' => 'Your cart is empty.',
+            ]);
+        }
+
+        DB::transaction(function () use ($items, $user) {
+            $products = Product::query()
+                ->whereIn('id', $items->pluck('product_id'))
+                ->lockForUpdate()
+                ->get(['id', 'name', 'stock_quantity']);
+
+            $productMap = $products->keyBy('id');
+
+            foreach ($items as $item) {
+                $product = $productMap->get($item->product_id);
+                $available = $product?->stock_quantity ?? 0;
+
+                if (! $product || $item->quantity > $available) {
+                    $name = $product?->name ?? 'Product';
+
+                    throw ValidationException::withMessages([
+                        'quantity' => "Only {$available} left in stock for {$name}.",
+                    ]);
+                }
+            }
+
+            foreach ($items as $item) {
+                $product = $productMap->get($item->product_id);
+                $product->decrement('stock_quantity', $item->quantity);
+            }
+
+            CartItem::query()
+                ->where('user_id', $user->id)
+                ->delete();
+        });
+
+        return back()->with('success', 'Purchase completed.');
     }
 }

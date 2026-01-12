@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,6 +39,7 @@ watchEffect(() => {
     });
 });
 
+const isAuthenticated = computed(() => !!page.props.auth.user);
 const flashMessage = computed(
     () => (page.props.flash as { success?: string } | undefined)?.success
 );
@@ -55,6 +56,10 @@ const updateItem = (item: CartItem) => {
 
 const removeItem = (item: CartItem) => {
     router.delete(`/cart/${item.id}`, { preserveScroll: true });
+};
+
+const checkout = () => {
+    router.post('/cart/checkout', {}, { preserveScroll: true });
 };
 
 const total = computed(() =>
@@ -97,10 +102,20 @@ const formatPrice = (value: string | number) => {
             </div>
 
             <div
-                v-if="errors.quantity"
+                v-if="errors.quantity || errors.cart"
                 class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
             >
-                {{ errors.quantity }}
+                {{ errors.quantity ?? errors.cart }}
+            </div>
+
+            <div
+                v-if="!isAuthenticated"
+                class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700"
+            >
+                Log in to manage your cart and checkout.
+                <Link href="/login" class="ml-2 text-primary underline">
+                    Log in
+                </Link>
             </div>
 
             <div
@@ -162,11 +177,20 @@ const formatPrice = (value: string | number) => {
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between pt-6 text-lg">
-                    <span class="font-medium text-muted-foreground">Total</span>
-                    <span class="font-semibold text-foreground">
-                        {{ formatPrice(total) }}
-                    </span>
+                <div class="flex flex-col gap-3 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex items-center justify-between text-lg">
+                        <span class="font-medium text-muted-foreground">Total</span>
+                        <span class="font-semibold text-foreground">
+                            {{ formatPrice(total) }}
+                        </span>
+                    </div>
+                    <Button
+                        v-if="isAuthenticated"
+                        type="button"
+                        @click="checkout"
+                    >
+                        Buy now
+                    </Button>
                 </div>
             </div>
 
@@ -174,9 +198,21 @@ const formatPrice = (value: string | number) => {
                 v-else
                 class="rounded-xl border border-dashed border-sidebar-border/70 px-6 py-12 text-center text-sm text-muted-foreground"
             >
-                Your cart is empty.
-                <Link href="/products" class="ml-2 text-primary underline">
+                <span v-if="isAuthenticated">Your cart is empty.</span>
+                <span v-else>Log in to view your cart.</span>
+                <Link
+                    v-if="isAuthenticated"
+                    href="/products"
+                    class="ml-2 text-primary underline"
+                >
                     Browse products
+                </Link>
+                <Link
+                    v-else
+                    href="/login"
+                    class="ml-2 text-primary underline"
+                >
+                    Log in
                 </Link>
             </div>
         </div>
