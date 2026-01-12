@@ -14,14 +14,19 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
+import { BookOpen, Folder, ShoppingCart, Store } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
+        title: 'Products',
+        href: '/products',
+        icon: Store,
+    },
+    {
+        title: 'Cart',
+        href: '/cart',
+        icon: ShoppingCart,
     },
 ];
 
