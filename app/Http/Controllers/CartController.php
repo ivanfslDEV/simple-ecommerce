@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\SendLowStockNotification;
 use App\Models\CartItem;
+use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -120,9 +121,10 @@ class CartController extends Controller
             $products = Product::query()
                 ->whereIn('id', $items->pluck('product_id'))
                 ->lockForUpdate()
-                ->get(['id', 'name', 'stock_quantity']);
+                ->get(['id', 'name', 'price', 'stock_quantity']);
 
             $productMap = $products->keyBy('id');
+            $orderTotal = 0;
 
             foreach ($items as $item) {
                 $product = $productMap->get($item->product_id);
@@ -135,17 +137,32 @@ class CartController extends Controller
                         'quantity' => "Only {$available} left in stock for {$name}.",
                     ]);
                 }
+
+                $orderTotal += (float) $product->price * $item->quantity;
             }
+
+            $order = Order::query()->create([
+                'total_price' => $orderTotal,
+                'status' => 'completed',
+                'created_by' => $user->id,
+                'updated_by' => $user->id,
+            ]);
 
             $lowStockThreshold = SendLowStockNotification::DEFAULT_THRESHOLD;
 
             foreach ($items as $item) {
                 $product = $productMap->get($item->product_id);
-                $previousStock = $product->stock_quantity;
+                $previousStock = (int) $product->stock_quantity;
 
                 $product->decrement('stock_quantity', $item->quantity);
 
-                $remaining = $product->stock_quantity;
+                $remaining = $previousStock - $item->quantity;
+
+                $order->items()->create([
+                    'product_id' => $product->id,
+                    'quantity' => $item->quantity,
+                    'unit_price' => $product->price,
+                ]);
 
                 if ($previousStock > $lowStockThreshold && $remaining <= $lowStockThreshold) {
                     SendLowStockNotification::dispatch($product, $remaining, $lowStockThreshold)

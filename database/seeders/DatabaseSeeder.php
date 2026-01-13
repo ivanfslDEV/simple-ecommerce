@@ -14,8 +14,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
@@ -23,32 +21,32 @@ class DatabaseSeeder extends Seeder
 
         Product::query()->insert([
             [
-                'name' => 'Canvas Backpack',
-                'image_url' => 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80',
+                'name' => 'Flag of Brazil',
+                'image_url' => 'https://flagcdn.com/w320/br.png',
                 'price' => 48.00,
                 'stock_quantity' => 12,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Stainless Water Bottle',
-                'image_url' => 'https://images.unsplash.com/photo-1526406915894-6c2283c7b2b4?auto=format&fit=crop&w=800&q=80',
+                'name' => 'Flag of Portugal',
+                'image_url' => 'https://flagcdn.com/w320/pt.png',
                 'price' => 24.50,
                 'stock_quantity' => 25,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Wireless Earbuds',
-                'image_url' => 'https://images.unsplash.com/photo-1518441902111-c1d1f1fe9c2d?auto=format&fit=crop&w=800&q=80',
+                'name' => 'Flag of USA',
+                'image_url' => 'https://flagcdn.com/w320/us.png',
                 'price' => 89.99,
                 'stock_quantity' => 8,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Desk Lamp',
-                'image_url' => 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80',
+                'name' => 'Flag of Germany',
+                'image_url' => 'https://flagcdn.com/w320/de.png',
                 'price' => 35.00,
                 'stock_quantity' => 15,
                 'created_at' => now(),

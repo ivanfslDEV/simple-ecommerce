@@ -17,7 +17,7 @@ class SendLowStockNotification implements ShouldQueue
 
     public const DEFAULT_THRESHOLD = 5;
 
-    public const ADMIN_EMAIL = 'ivanfslima@gmail.com';
+    public const ADMIN_EMAIL = 'admin@example.com';
 
     public function __construct(
         public Product $product,
