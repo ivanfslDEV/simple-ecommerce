@@ -1,25 +1,74 @@
-# Laravel + Vue Starter Kit
+# Simple Ecommerce
 
-## Introduction
+A small Laravel + Vue (Inertia) demo app with a product catalog, cart, and stock-aware checkout.
 
-Our Vue starter kit provides a robust, modern starting point for building Laravel applications with a Vue frontend using [Inertia](https://inertiajs.com).
+## Features
+- Product catalog with images, prices, and stock counts
+- Authenticated cart flow (add, update quantities, remove)
+- Checkout creates orders, validates stock, and decrements inventory in a transaction
+- Low stock alert email when inventory crosses a threshold
+- Daily sales report email scheduled at 20:00
 
-Inertia allows you to build modern, single-page Vue applications using classic server-side routing and controllers. This lets you enjoy the frontend power of Vue combined with the incredible backend productivity of Laravel and lightning-fast Vite compilation.
+## Tech Stack
+- Laravel 12, PHP 8.2+
+- Vue 3 + Inertia, TypeScript, Tailwind CSS, shadcn-vue
+- Vite tooling
+- Database-backed queues and scheduler
 
-This Vue starter kit utilizes Vue 3 and the Composition API, TypeScript, Tailwind, and the [shadcn-vue](https://www.shadcn-vue.com) component library.
+## Quick Start
 
-## Official Documentation
+### Requirements
+- PHP 8.2+ and Composer
+- Node.js 18+ and npm
+- SQLite (default) or another supported database
 
-Documentation for all Laravel starter kits can be found on the [Laravel website](https://laravel.com/docs/starter-kits).
+### Setup
+Option 1: one-shot setup script
+```bash
+composer run setup
+```
 
-## Contributing
+Option 2: manual
+```bash
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+npm install
+npm run dev
+```
 
-Thank you for considering contributing to our starter kit! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Run locally
+```bash
+composer run dev
+```
+This starts the PHP server, the queue worker, and Vite in one terminal.
 
-## Code of Conduct
+For the scheduled daily report, run in another terminal:
+```bash
+php artisan schedule:work
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Visit `http://localhost:8000`.
 
-## License
+## Demo Data
+- Seeded user: `test@example.com` / `password`
+- Seeded products: flags (see `database/seeders/DatabaseSeeder.php`)
 
-The Laravel + Vue starter kit is open-sourced software licensed under the MIT license.
+## Emails and Notifications
+- Low stock alerts are queued and sent when inventory drops to the threshold.
+- Daily sales report is queued from the scheduler at 20:00.
+- Admin email defaults to `admin@example.com` in `app/Jobs/SendLowStockNotification.php` and `app/Jobs/SendDailySalesReport.php`.
+- Low stock threshold default is `5` in `app/Jobs/SendLowStockNotification.php`.
+- Default mailer is `log` in `.env.example`; switch to SMTP to deliver emails.
+
+## Useful Commands
+- `composer run dev` - server, queue worker, Vite
+- `composer run test` - lint and tests
+- `composer run lint` - PHP formatting via Pint
+- `npm run lint` - JS/TS lint
+- `npm run format` - Prettier formatting
+
+## Project Structure (high level)
+- `app/Http/Controllers` - product and cart flows
+- `app/Jobs` and `app/Mail` - low stock alerts and daily sales report
+- `resources/js/pages` - Vue pages for products and cart
